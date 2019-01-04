@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<link rel="stylesheet" href="w3.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body class="w3-flat-belize-hole" style="animation: changeColor 50s infinite alternate;">
+
+<?php  
+  // Start session
+  session_start();
+
+  // Allowed screens list
+  $allowed_screens = array("home","login","registo");
+
+  // Check screen
+  $currentScreen = "home";
+  if(isset($_GET['screen'])){
+    if(in_array($_GET['screen'], $allowed_screens)){
+      $currentScreen = $_GET['screen'];
+    }else{
+      header("Location: ?screen=home");
+    }
+  }
+
+  $_SESSION['messageRegisto']='';
+  $_SESSION['messageLogin']='';
+
+  $mysqli = new mysqli('localhost','root','ovelha19?','users');
+
+  if ($mysqli->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+} 
+
+  if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['registo'])){
+
+    //two passwords are equal to each other
+    if ($_POST['password'] == $_POST['confirmPassword']){
+
+      $firstname = $mysqli->real_escape_string($_POST['firstname']);
+      $lastname = $mysqli->real_escape_string($_POST['lastname']);
+      $email = $mysqli->real_escape_string($_POST['email']);
+      $password = md5($_POST['password']); //nd5 hash password security
+
+      
+
+      $sql = "INSERT INTO `accounts` (`Id`, `FirstName`, `LastName`, `Email`, `Password`) VALUES (NULL, '$firstname', '$lastname', '$email', '$password')";
+
+      //if the query is sucessfull, redirect to welcome-php page,done!
+      if($mysqli->query($sql)===True){
+        $_SESSION['email'] = $email;
+        $_SESSION['firstname'] = $firstname;
+        $_SESSION['lastname'] = $lastname;
+        $_SESSION['messageRegisto']='Registration sucessfull!';
+        header("Location: ?screen=home");
+      }else{
+        $_SESSION['messageRegisto']='Registration not sucessfull!';
+      }
+
+    }else{
+      $_SESSION['messageRegisto']='Passwords do not match!';
+    }
+  }
+
+  if($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])){
+
+    $email = $mysqli->real_escape_string($_POST['email']);
+    $password = md5($_POST['password']);
+
+    $sql = "SELECT * FROM accounts WHERE Email='$email' AND Password='$password'";
+    $result = $mysqli->query($sql);
+
+    if (!$result) {
+      trigger_error('Invalid query: ' . $mysqli->error);
+    } 
+    $num_rows = $result->num_rows;
+
+    if($num_rows > 0){
+      $row = $result->fetch_assoc();
+      $id = $row["Id"];
+      $firstname = $row["FirstName"];
+      $lastname = $row["LastName"];
+      $email = $row["Email"];
+
+      $_SESSION['id'] = $id;
+      $_SESSION['email'] = $email;
+      $_SESSION['firstname'] = $firstname;
+      $_SESSION['lastname'] = $lastname;
+      $_SESSION['messageLogin']='Login sucessfull!';
+      header("Location: ?screen=home?id=$id");
+    }else{
+      $_SESSION['messageLogin']='email or pass incorrect!';
+    }
+
+  }
+
+?>
+
+
+<div class="w3-top">
+  <div class="w3-bar" id="myNavbar">
+    <a class="w3-bar-item w3-button w3-hover-black w3-hide-medium w3-hide-large w3-right" href="javascript:void(0);" onclick="toggleFunction()" title="Toggle Navigation Menu">
+      <i class="fa fa-bars"></i>
+    </a>
+    <a href="#home" class="w3-bar-item w3-button w3-hover-flat-belize-hole w3-bottombar w3-hover-border-green" style="animation: changeColor 50s infinite alternate;">HOME</a>
+    <a href="#about" class="w3-bar-item w3-button w3-hover-flat-belize-hole w3-hide-small w3-bottombar w3-hover-border-green" style="animation: changeColor 50s infinite alternate;"><i class="fa fa-user"></i> ABOUT</a>
+    <a href="#portfolio" class="w3-bar-item w3-hover-flat-belize-hole w3-button w3-hide-small w3-bottombar w3-hover-border-green" style="animation: changeColor 50s infinite alternate;"><i class="fa fa-th"></i> PORTFOLIO</a>
+    <a href="#contact" class="w3-bar-item w3-button w3-hover-flat-belize-hole w3-hide-small w3-bottombar w3-hover-border-green" style="animation: changeColor 50s infinite alternate;"><i class="fa fa-envelope"></i> CONTACT</a>
+    <a href="#" class="w3-bar-item w3-button w3-hide-small w3-right w3-hover-flat-belize-hole w3-bottombar w3-hover-border-green" style="animation: changeColor 50s infinite alternate;">
+      <i class="fa fa-search"></i>
+    </a>
+  </div>
+
+  <!-- Navbar on small screens -->
+  <div id="navDemo" class="w3-bar-block w3-white w3-hide w3-hide-large w3-hide-medium">
+    <a href="#about" class="w3-bar-item w3-button" onclick="toggleFunction()">ABOUT</a>
+    <a href="#portfolio" class="w3-bar-item w3-button" onclick="toggleFunction()">PORTFOLIO</a>
+    <a href="#contact" class="w3-bar-item w3-button" onclick="toggleFunction()">CONTACT</a>
+    <a href="#" class="w3-bar-item w3-button">SEARCH</a>
+  </div>
+</div>
+
+<div id="home">
+  <div class="w3-display-middle" style="white-space:nowrap;">
+    <span class="w3-center w3-padding-large w3-black w3-xxlarge w3-wide w3-animate-top" style="box-shadow: 5px 10px 10px 1px #202123;">OUR THEMES</span>
+  </div>
+</div>
+
+<div class="w3-card w3-row w3-flat-wet-asphalt w3-animate-left" style="margin-top: 700px;">
+  <div class="w3-container w3-threequarter">
+    <div class="w3-rest w3-container">
+  <h2>OurThemes</h2>
+  <div class="w3-row">
+    <div class="w3-container w3-flat-wet-asphalt w3-card w3-animate-left">
+      <h2>Welcome</h2>  
+      <p>Welcome to our new social media! The Adventure starts here!</p>
+    </div>
+    <div class="w3-container w3-margin-top w3-flat-wet-asphalt w3-card w3-animate-left">
+      <h2>About this social media</h2>  
+      <p>You can search and post your own pics in different themes! You can make amoug of friends in each theme to talk more about your likes.</p>
+      <p>Like other pics, comment other pictures, Have fun wathing other pictures!</p>
+    </div>
+    <div class=" w3-card w3-flat-wet-asphalt w3-animate-left">
+         <div class="w3-panel w3-leftbar w3-border-green " style="margin-bottom: 0;">
+            <p class="w3-xxlarge w3-serif">
+            <i>"It is funny for us."</i></p>
+            <p>Simão Ferreira</p>
+          </div> 
+        <img src="code1.png" class="w3-leftbar w3-border-green" style="width:100%;">
+    </div>
+
+    <div class="w3-row w3-animate-left">
+      <div class="w3-container w3-half w3-margin-top">
+          <div class="w3-panel w3-leftbar w3-border-green w3-grey" style="margin-bottom: 0;">
+            <p class="w3-xxlarge w3-serif">
+            <i>"Just for you."</i></p>
+            <p>Bruno Ribeiro</p>
+          </div>
+          <img src="code2.png" class="w3-card w3-leftbar w3-border-green" style="width:100%;">
+      </div>
+      <div class="w3-container w3-half w3-margin-top w3-margin-bottom w3-animate-left ">
+          <div class="w3-panel w3-leftbar w3-border-green w3-grey" style="margin-bottom: 0;">
+            <p class="w3-xxlarge w3-serif">
+            <i>"Have fun with us."</i></p>
+            <p>Bruno Ribeiro,Simão Ferreira</p>
+          </div>
+          <img src="code2.png" class="w3-card w3-leftbar w3-border-green" style="width:100%;">
+      </div>
+    </div>
+
+    <div class="w3-row w3-margin-bottom w3-animate-left">
+      <div class="w3-half w3-margin-top">
+          <div class="w3-card w3-half" style="width:50%;margin-left: 25%;">
+            <img  src="img_avatar3.png" alt="Person" style="width:100%">
+            <div class="w3-grey w3-container ">
+              <h4><b>Simão Ferreira</b></h4>
+              <p>The boss of all bosses</p>
+            </div>
+          </div> 
+      </div>
+      <div class="w3-half w3-margin-top w3-animate-left">
+          <div class="w3-card w3-half" style="width:50%;margin-left: 25%;">
+            <img  src="img_avatar3.png" alt="Person" style="width:100%">
+            <div class="w3-grey w3-container ">
+              <h4><b>Bruno Ribeiro</b></h4>
+              <p>The boss of all bosses</p>
+            </div>
+          </div> 
+      </div>
+    </div>
+  </div>
+</div>
+  </div>
+  <div class="w3-container w3-quarter">
+  	
+    <div class="w3-display-container w3-margin borderForm ">
+    	<h2>Login</h2>
+            <form method="post" class="w3-container w3-flat-belize-hole w3-card" action="?screen=home">
+            <p>      
+            <label class="w3-text-brown"><b>E-mail</b></label>
+            <input class="w3-input w3-border w3-sand " name="email" type="email" required=""></p>
+            <p>      
+            <label class="w3-text-brown"><b>Password</b></label>
+            <input class="w3-input w3-border w3-sand " name="password" type="password" required=""></p>
+            <p>
+            <label class="w3-text-red"><?= $_SESSION['messageLogin'] ?></label>
+            <button name="login" class="w3-btn w3-brown ">Login</button></p>
+            </form>
+    </div>
+
+    <br>
+    <div id="registo" class="w3-display-container w3-margin borderForm">
+        <h2>Registo</h2>
+          <form method="post" class="w3-container w3-flat-belize-hole w3-card" action="?screen=registo">
+          <p>      
+          <label class="w3-text-brown"><b>First Name</b></label>
+          <input class="w3-input w3-border w3-sand" name="firstname" type="text" required="">
+        </p>
+          <p>      
+          <label class="w3-text-brown"><b>Last Name</b></label>
+          <input class="w3-input w3-border w3-sand" name="lastname" type="text" required="">
+          </p>
+          <p>
+          <label class="w3-text-brown"><b>E-mail</b></label>
+          <input class="w3-input w3-border w3-sand" name="email" type="email" required="">
+          <p> 
+          <label class="w3-text-brown"><b>Password</b></label>
+          <input class="w3-input w3-border w3-sand" name="password" type="password" required=""></p>
+          <p>  
+          <label class="w3-text-brown"><b>Confirm Password</b></label>
+          <input class="w3-input w3-border w3-sand" name="confirmPassword" type="password" required=""></p>
+          <p>
+          <p>  
+          <button name="registo" class="w3-btn w3-brown">Register</button></p>
+          </form>
+      </div>
+    
+
+  </div>
+</div>
+</div>
+
+<footer class="w3-row w3-flat-belize-hole">
+    <div class="w3-col w3-container">
+      <h6 style="color: white;font-weight: bold;">&copy; 2018, RISING SEASONS COMPANY, ALL RIGHTS RESERVED</h6>
+    </div>
+</footer>
+
+<script>
+// Change style of navbar on scroll
+window.onscroll = function() {myFunction()};
+function myFunction() {
+    var navbar = document.getElementById("myNavbar");
+    if (document.body.scrollTop > 600 || document.documentElement.scrollTop > 600) {
+        navbar.className = "w3-bar" + " w3-card" + " w3-animate-top" + " w3-flat-belize-hole";
+    } else {
+        navbar.className = navbar.className.replace(" w3-card w3-animate-top w3-flat-belize-hole", "");
+    }
+}
+
+
+</script>
+
+
+</body>
+</html>
